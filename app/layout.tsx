@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { WalletProvider } from "@/context/wallet-context"
 import { CharacterProvider } from "@/context/character-context"
+import { StoryProvider } from "@/context/story-context"
 import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -25,8 +26,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <WalletProvider>
           <CharacterProvider>
-            {children}
-            <Toaster />
+            <StoryProvider>
+              {children}
+              <Toaster />
+            </StoryProvider>
           </CharacterProvider>
         </WalletProvider>
       </body>

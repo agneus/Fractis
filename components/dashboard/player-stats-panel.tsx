@@ -4,38 +4,78 @@ import { useState } from "react"
 import { Progress } from "@/components/ui/progress"
 import { Shield, Sword, Zap, Brain, Heart, Droplet } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useCharacter } from "@/context/character-context"
 
 export function PlayerStatsPanel() {
   const [isExpanded, setIsExpanded] = useState(false)
-
-  // Placeholder player data
-  const player = {
-    name: "Azrael Nightwhisper",
-    level: 24,
-    class: "Arcane Sentinel",
-    portrait: "/placeholder.svg?height=200&width=200",
+  const { getSelectedCharacter } = useCharacter()
+  const selectedCharacter = getSelectedCharacter()
+  
+  // If no character is selected, use default placeholder data
+  const player = selectedCharacter ? {
+    name: selectedCharacter.name,
+    level: selectedCharacter.level,
+    class: selectedCharacter.class === "mage" ? "Arcane Mage" : 
+           selectedCharacter.class === "warrior" ? "Battle Warrior" :
+           selectedCharacter.class === "rogue" ? "Shadow Rogue" :
+           selectedCharacter.class === "healer" ? "Divine Healer" :
+           selectedCharacter.class === "sentinel" ? "Arcane Sentinel" : 
+           "Adventurer",
+    portrait: selectedCharacter.portrait,
     health: {
-      current: 420,
-      max: 500,
-      percent: 84,
+      current: selectedCharacter.stats.health.current,
+      max: selectedCharacter.stats.health.max,
+      percent: 0, // Will be calculated below
     },
     mana: {
-      current: 180,
-      max: 200,
-      percent: 90,
+      current: selectedCharacter.stats.mana.current,
+      max: selectedCharacter.stats.mana.max,
+      percent: 0, // Will be calculated below
     },
     experience: {
-      current: 8750,
-      next: 10000,
-      percent: 87.5,
+      current: selectedCharacter.stats.experience.current,
+      next: selectedCharacter.stats.experience.next,
+      percent: 0, // Will be calculated below
+    },
+    attributes: selectedCharacter.stats.attributes,
+  } : {
+    name: "No Character Selected",
+    level: 1,
+    class: "Adventurer",
+    portrait: "/placeholder.svg?height=200&width=200",
+    health: {
+      current: 100,
+      max: 100,
+      percent: 100,
+    },
+    mana: {
+      current: 50,
+      max: 50,
+      percent: 100,
+    },
+    experience: {
+      current: 0,
+      next: 500,
+      percent: 0,
     },
     attributes: {
-      strength: 42,
-      intelligence: 68,
-      agility: 35,
-      defense: 50,
-      arcane: 75,
+      strength: 10,
+      intelligence: 10,
+      agility: 10,
+      defense: 10,
+      arcane: 10,
     },
+  }
+  
+  // Calculate percentages
+  if (player.health.max > 0) {
+    player.health.percent = (player.health.current / player.health.max) * 100
+  }
+  if (player.mana.max > 0) {
+    player.mana.percent = (player.mana.current / player.mana.max) * 100
+  }
+  if (player.experience.next > 0) {
+    player.experience.percent = (player.experience.current / player.experience.next) * 100
   }
 
   return (
