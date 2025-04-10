@@ -3,8 +3,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Sparkles, User, LayoutDashboard, Swords, Wallet, X, Menu } from "lucide-react"
+import { Sparkles, User, LayoutDashboard, Swords, X, Menu } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { WalletButton } from "@/components/wallet/wallet-button"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -46,14 +47,11 @@ export function Header() {
           </Link>
         </nav>
 
-        <Button
+        <WalletButton
           variant="outline"
           size="sm"
           className="hidden md:flex items-center gap-2 bg-purple-950/50 border-purple-500/50 hover:bg-purple-900/70 text-purple-300 hover:text-white"
-        >
-          <Wallet className="w-4 h-4" />
-          <span>Connect Wallet</span>
-        </Button>
+        />
 
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -108,10 +106,11 @@ export function Header() {
                 </nav>
               </div>
               <div className="p-4 border-t border-purple-800/30">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                  <Wallet className="mr-2 h-5 w-5" />
-                  <span>Connect Wallet</span>
-                </Button>
+                <WalletButton 
+                  variant="default"
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  isMobile={true}
+                />
               </div>
             </div>
           </SheetContent>

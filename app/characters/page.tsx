@@ -11,51 +11,23 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Shield, Sword, Sparkles, Heart, Plus, User, CheckCircle2, ArrowRight, Footprints, Flame } from "lucide-react"
 import { useRouter } from "next/navigation"
-
-// Character class types
-type CharacterClass = "warrior" | "mage" | "rogue" | "healer" | "sentinel"
-
-// Character data type
-type Character = {
-  id: string
-  name: string
-  class: CharacterClass
-  level: number
-  portrait: string
-  lastPlayed?: Date
-}
+import { useCharacter, Character, CharacterClass } from "@/context/character-context"
 
 export default function CharactersPage() {
   const router = useRouter()
   const [isCreating, setIsCreating] = useState(false)
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null)
-  const [newCharacter, setNewCharacter] = useState<{
-    name: string
-    class: CharacterClass | null
-  }>({
-    name: "",
-    class: null,
-  })
-
-  // Sample character data
-  const [characters, setCharacters] = useState<Character[]>([
-    {
-      id: "char-1",
-      name: "Azrael Nightwhisper",
-      class: "mage",
-      level: 24,
-      portrait: "/placeholder.svg?height=200&width=200",
-      lastPlayed: new Date(Date.now() - 86400000), // 1 day ago
-    },
-    {
-      id: "char-2",
-      name: "Thorne Ironheart",
-      class: "warrior",
-      level: 18,
-      portrait: "/placeholder.svg?height=200&width=200",
-      lastPlayed: new Date(Date.now() - 604800000), // 1 week ago
-    },
-  ])
+  const { 
+    characters, 
+    selectedCharacterId, 
+    setSelectedCharacterId,
+    newCharacter, 
+    setNewCharacter, 
+    addCharacter,
+    updateCharacter,
+    selectCharacter,
+    resetNewCharacter,
+    getClassPortrait
+  } = useCharacter()
 
   // Character class options
   const characterClasses = [
@@ -108,52 +80,25 @@ export default function CharactersPage() {
     return classInfo ? classInfo.color : "text-gray-400"
   }
 
-  // Get class portrait based on class name
-  const getClassPortrait = (className: CharacterClass | null) => {
-    if (!className) return "/placeholder.svg?height=300&width=300"
-
-    switch (className) {
-      case "warrior":
-        return "/placeholder.svg?height=300&width=300&text=Warrior"
-      case "mage":
-        return "/placeholder.svg?height=300&width=300&text=Mage"
-      case "rogue":
-        return "/placeholder.svg?height=300&width=300&text=Rogue"
-      case "healer":
-        return "/placeholder.svg?height=300&width=300&text=Healer"
-      case "sentinel":
-        return "/placeholder.svg?height=300&width=300&text=Sentinel"
-      default:
-        return "/placeholder.svg?height=300&width=300"
-    }
-  }
-
   // Handle character creation
   const handleCreateCharacter = () => {
     if (!newCharacter.name || !newCharacter.class) return
 
-    const newChar: Character = {
-      id: `char-${Date.now()}`,
+    addCharacter({
       name: newCharacter.name,
       class: newCharacter.class,
-      level: 1,
       portrait: getClassPortrait(newCharacter.class),
-      lastPlayed: new Date(),
-    }
-
-    setCharacters([...characters, newChar])
+    })
+    
     setIsCreating(false)
-    setNewCharacter({ name: "", class: null })
-    setSelectedCharacter(newChar.id)
+    resetNewCharacter()
   }
 
   // Handle character selection and play
   const handlePlayCharacter = () => {
-    if (selectedCharacter) {
-      // Update last played time
-      setCharacters(
-        characters.map((char) => (char.id === selectedCharacter ? { ...char, lastPlayed: new Date() } : char)),
-      )
+    if (selectedCharacterId) {
+      // Select character will update the last played time
+      selectCharacter(selectedCharacterId)
 
       // Redirect to dashboard
       router.push("/dashboard")
@@ -201,15 +146,15 @@ export default function CharactersPage() {
                     className={`
                       relative rounded-lg border overflow-hidden transition-all duration-200
                       ${
-                        selectedCharacter === character.id
+                        selectedCharacterId === character.id
                           ? "border-purple-500 shadow-lg shadow-purple-500/20"
                           : "border-gray-800 hover:border-purple-800"
                       }
                     `}
-                    onClick={() => setSelectedCharacter(character.id)}
+                    onClick={() => setSelectedCharacterId(character.id)}
                   >
                     <div className="absolute top-3 right-3 z-10">
-                      {selectedCharacter === character.id && (
+                      {selectedCharacterId === character.id && (
                         <div className="bg-purple-600 rounded-full p-1">
                           <CheckCircle2 className="h-5 w-5" />
                         </div>
@@ -256,7 +201,7 @@ export default function CharactersPage() {
             )}
 
             {/* Play button */}
-            {selectedCharacter && (
+            {selectedCharacterId && (
               <div className="mt-8 flex justify-center">
                 <Button
                   onClick={handlePlayCharacter}
